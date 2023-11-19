@@ -1,23 +1,29 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export class Model {
-  username!: string;
-  password!: string;
-  name!: string;
-  role: UserRole = UserRole.student;
-}
 // eslint-disable-next-line react-refresh/only-export-components
 export enum UserRole {
   admin = 'admin',
   teacher = 'teacher',
   student = 'student',
 }
-export class AuthContextProps {
-  user!: string | null;
-  login!: (model: Model) => void;
-  logout!: () => void;
-  validateCredentials!: (model: Model) => boolean;
-  getUserInfo!: () => Model;
+
+export interface UserModel {
+  username: string;
+  password: string;
+  name: string;
+  role: UserRole;
+}
+
+export interface AuthContextProps {
+  user: string | null;
+  login: (userModel: UserModel) => void;
+  logout: () => void;
+  validateCredentials: (userModel: UserModel) => boolean;
+  getUserInfo: () => UserModel;
+  isAdmin: () => boolean;
+  isTeacher: () => boolean;
+  isStudent: () => boolean;
+  validCredentials: UserModel[];
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -26,20 +32,22 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const initialUser: string | null = localStorage.getItem('user') || null;
+
+const initialValidCredentials: UserModel[] = [
+  { username: 'admin', password: 'admin', name: 'Admin', role: UserRole.admin },
+  { username: 'teacher', password: 'teacher', name: 'Teacher', role: UserRole.teacher },
+  { username: 'student', password: 'student', name: 'Student', role: UserRole.student },
+];
+
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-    const [user, setUser] = useState<string | null>(localStorage.getItem('user') || null);
+  const [user, setUser] = useState<string | null>(initialUser);
+  const [validCredentials] = useState<UserModel[]>(initialValidCredentials);
 
-    const validCredentials: Model[] = [
-      { username: 'admin', password: 'admin', name: 'Admin', role: UserRole.admin },
-      { username: 'teacher', password: 'teacher', name: 'Teacher', role: UserRole.teacher },
-      { username: 'student', password: 'student', name: 'Student', role: UserRole.student },
-    ];
-    
-
-  const login = (model: Model) => {
-    if (validateCredentials(model)) {
-      setUser(model.username);
-      localStorage.setItem('user', model.username);
+  const login = (userModel: UserModel) => {
+    if (validateCredentials(userModel)) {
+      setUser(userModel.username);
+      localStorage.setItem('user', userModel.username);
     }
   };
 
@@ -48,19 +56,16 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user');
   };
 
-  const validateCredentials = (model: Model) => {
+  const validateCredentials = (userModel: UserModel) => {
     return validCredentials.some(
-      (cred) => cred.username === model.username && cred.password === model.password
+      (cred) => cred.username === userModel.username && cred.password === userModel.password
     );
   };
-  
 
-  const getUserInfo = (): Model => {
-    const userInfo: Model | undefined = validCredentials.find((cred) => cred.username === user);
-    return userInfo || { username: '', password: '', name: '', role: UserRole.student };
+  const getUserInfo = (): UserModel => {
+    const userInfo: UserModel | undefined = validCredentials.find((cred) => cred.username === user);
+    return userInfo || { username: '', password: '', name: '', role: UserRole.admin };
   };
-  
-  
 
   const value: AuthContextProps = {
     user,
@@ -68,6 +73,10 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     validateCredentials,
     getUserInfo,
+    isAdmin: () => getUserInfo().role === UserRole.admin,
+    isTeacher: () => getUserInfo().role === UserRole.teacher,
+    isStudent: () => getUserInfo().role === UserRole.student,
+    validCredentials,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
