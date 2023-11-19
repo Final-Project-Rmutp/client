@@ -4,9 +4,10 @@ import { useAuth } from '../../auth/AuthLogin';
 import Dropdown from '../../shared/dropdown/Dropdown';
 import Datetime from '../../shared/datetime/Datetime';
 import Floor6 from "../../components/floor6/Floor6";
-import './Room.scss'; // You can uncomment this line if you have a Room.scss file
+import './Room.scss';
+
 const Room: React.FC = () => {
-  const { user, logout, getUserInfo } = useAuth();
+  const { user, logout, getUserInfo, isAdmin, isTeacher, isStudent } = useAuth();
   const navigate = useNavigate();
   const userInfo = getUserInfo();
   const [selectedFloor, setSelectedFloor] = useState<string | null>(null);
@@ -31,8 +32,26 @@ const Room: React.FC = () => {
       )}
       <div className="center-controls">
         <div className="controls">
-          <label htmlFor="roomDropdown">Select Room:</label>
-          <Dropdown onFloorSelect={handleFloorSelect} />
+          {isAdmin() && (
+            <>
+              <label htmlFor="roomDropdown">Select Room:</label>
+              <Dropdown onFloorSelect={handleFloorSelect} />
+              {/* Additional controls for admin */}
+            </>
+          )}
+          {isTeacher() && (
+            <>
+              <label htmlFor="roomDropdown">Select Room:</label>
+              <Dropdown onFloorSelect={handleFloorSelect} />
+              {/* Additional controls for teacher */}
+            </>
+          )}
+          {isStudent() && (
+            <>
+              {/* Student-specific controls, e.g., show a message that they cannot select */}
+              <p>You are not allowed to select a room.</p>
+            </>
+          )}
           <label htmlFor="dateTimeInput">Select Date and Time:</label>
           <Datetime />
         </div>

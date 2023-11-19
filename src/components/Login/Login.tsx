@@ -28,18 +28,31 @@ const Login: React.FC = () => {
       password: '',
       general: '',
     });
-
+  
     // Validate credentials
     const isValidCredentials = validateCredentials({ username, password, name: '', role: UserRole.admin });
-
+  
     if (isValidCredentials) {
       const foundUser = validCredentials.find((cred) => cred.username === username);
       if (foundUser) {
         const user = { username, password, name: '', role: foundUser.role };
         login(user);
-
-        // Navigate based on the role
-        navigate(`/${user.role}`); // Assuming roles are mapped to routes like '/admin', '/student', '/teacher'
+  
+        // Use the navigate function to redirect to the appropriate route
+        switch (user.role) {
+          case UserRole.admin:
+            navigate('/admin');
+            break;
+          case UserRole.teacher:
+            navigate('/teacher'); // You can customize the route for teachers
+            break;
+          case UserRole.student:
+            navigate('/student');
+            break;
+          default:
+            // Navigate to a default route if the role is not recognized
+            navigate('/');
+        }
       }
     } else {
       // Display error messages
