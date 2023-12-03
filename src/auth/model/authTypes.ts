@@ -1,25 +1,25 @@
-// authTypes.ts
-export enum UserRole {
-  admin = 'admin',
-  teacher = 'teacher',
-  student = 'student',
+//authTypes.ts
+export interface UserData {
+  pin: string;
+  citizen_id: string;
+  firstname: string;
+  lastname: string;
 }
+// export interface UpdateUserData {
+//   pin: string;
+//   citizen_id: string;
+//   firstname: string;
+//   lastname: string;
+// }
 
-export interface UserModel {
-  username: string;
-  password: string;
-  name: string;
-  role: UserRole;
-}
-
-export interface AuthContextProps {
-  user: string | null;
-  login: (userModel: UserModel) => void;
-  logout: () => void;
-  validateCredentials: (userModel: UserModel) => boolean;
-  getUserInfo: () => UserModel;
-  isAdmin: () => boolean;
-  isTeacher: () => boolean;
-  isStudent: () => boolean;
-  fetchUserInfo: () => Promise<UserModel | null>;
+export interface ListItem {
+  id: string;
+  pin: string;
+  firstname: string;
+  lastname: string;
+  citizen_id: string;
+  user_img_path:string | null;
+  accounttype: string;
+  accountstatus: string;
+  accountrole: string;
 }
